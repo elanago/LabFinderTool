@@ -1,245 +1,214 @@
 import streamlit as st
 import pandas as pd
 
-# Page Configuration
+# Set page config
 st.set_page_config(
-    page_title="Gonda Brain Center Lab Discovery Wizard",
+    page_title="Gonda Brain Center - Lab Discovery Wizard",
     page_icon="🧠",
-    layout="wide"
+    layout="centered"
 )
 
 # Custom Styling
 st.markdown("""
 <style>
-    .main-title {
+    .main-header {
         font-size: 2.2rem;
         color: #1E3A8A;
         font-weight: 700;
         margin-bottom: 0.2rem;
     }
-    .sub-title {
-        font-size: 1.05rem;
+    .sub-header {
+        font-size: 1.1rem;
         color: #4B5563;
         margin-bottom: 1.5rem;
+    }
+    .card {
+        background-color: #F8FAFC;
+        border-radius: 10px;
+        padding: 18px;
+        margin-bottom: 15px;
+        border-left: 5px solid #2563EB;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
     .core-badge {
         background-color: #FEF3C7;
         color: #92400E;
-        padding: 5px 12px;
-        border-radius: 12px;
+        font-size: 0.8rem;
         font-weight: 700;
-        font-size: 0.85rem;
+        padding: 3px 8px;
+        border-radius: 4px;
         border: 1px solid #F59E0B;
-        display: inline-block;
     }
     .aff-badge {
-        background-color: #F3F4F6;
-        color: #374151;
-        padding: 5px 12px;
-        border-radius: 12px;
+        background-color: #E0E7FF;
+        color: #3730A3;
+        font-size: 0.8rem;
         font-weight: 600;
-        font-size: 0.85rem;
-        border: 1px solid #D1D5DB;
-        display: inline-block;
-    }
-    .card {
-        border: 1px solid #E5E7EB;
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 18px;
-        background-color: #FFFFFF;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        padding: 3px 8px;
+        border-radius: 4px;
     }
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="main-title">🧠 Gonda Brain Center Lab Discovery Wizard</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">Answer 4 quick questions to find the Bar-Ilan neuroscience labs that best match your research goals.</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-header">🧠 Gonda Brain Center - Lab Match Wizard</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-header">Find your ideal research laboratory at Bar-Ilan University in 4 easy steps.</div>', unsafe_allow_html=True)
 
-# Complete Gonda Labs Database
+# Lab Data Directory
 LABS = [
-    # CORE FACULTY
     {
         "pi": "Prof. Izhar Bar-Gad",
         "status": "Core Faculty",
-        "dept": "Gonda Brain Research Center (Center Director)",
-        "lab": "Neural Interfaces Laboratory / Basal Ganglia & Neuromodulation",
+        "dept": "Gonda Brain Research Center",
+        "lab": "Neural Interfaces & Basal Ganglia Laboratory",
         "domain": "Systems & Circuit Neuroscience",
-        "subtopics": ["Basal Ganglia & Movement Disorders", "Deep Brain Stimulation (DBS)", "Tourette Syndrome & Motor Tics", "Closed-loop Neuromodulation"],
-        "tools": ["Multi-electrode Extracellular Recording", "Closed-loop DBS Systems", "LFP Signal Processing", "Neural Network Computational Modeling"],
-        "models": ["Rodents", "Primates", "Clinical DBS Cohorts"],
-        "clinical": "Parkinson's, Tourette Syndrome, Movement Disorders",
-        "summary": "Investigates cortico-striatal circuits and develops adaptive closed-loop DBS algorithms for movement and neuropsychiatric disorders.",
-        "pubs": "Handbook of Clinical Neurology: Neuromodulation in Basal Ganglia Disorders (2026); Motor tics evoked by striatal disinhibition (Frontiers)."
+        "subtopics": ["Basal Ganglia Circuits", "Deep Brain Stimulation (DBS)", "Parkinsonism", "Movement Disorders", "Neural Signal Processing"],
+        "tools": ["In Vivo Electrophysiology", "Closed-loop DBS", "LFP Dynamics", "Computational Modeling"],
+        "models": ["Rodents / Primates"],
+        "clinical": "Parkinson's & Movement Disorders, Tourette Syndrome",
+        "summary": "Investigates basal ganglia circuit dynamics in movement/behavioral disorders and develops adaptive closed-loop DBS systems.",
+        "pubs": "Handbook of Clinical Neurology: Neuromodulation (2026); Motor tics evoked by striatal disinhibition."
     },
     {
         "pi": "Prof. Elana Zion-Golumbic",
         "status": "Core Faculty",
-        "dept": "Gonda Brain Research Center (Undergrad Program Head)",
-        "lab": "Human Brain Dynamics and Real-Life Ecological Attention Laboratory",
+        "dept": "Gonda Brain Research Center",
+        "lab": "Human Brain Dynamics & Ecological Attention Lab",
         "domain": "Cognitive & Behavioral Neuroscience",
-        "subtopics": ["Auditory Attention & Speech Tracking", "Cocktail Party Effect", "ADHD & Auditory Distraction", "VR Ecological Environments"],
-        "tools": ["High-density EEG", "Magnetoencephalography (MEG)", "In-school Mobile EEG", "Virtual Reality (VR Classroom/Café)", "Temporal Response Functions (TRF)"],
+        "subtopics": ["Auditory Attention & Speech Tracking", "Natural Speech Processing", "ADHD Attention", "Ecological Cognition"],
+        "tools": ["Human Neuroimaging & Electrophysiology", "High-density EEG", "MEG", "Virtual Reality", "Mobile EEG"],
         "models": ["Humans"],
-        "clinical": "ADHD, Neurodevelopmental Attention Disorders",
-        "summary": "Studies dynamic speech tracking, selective attention in noisy environments, and auditory distraction using MEG, mobile EEG, and VR.",
-        "pubs": "Toward precision EEG: assessing individual ERP reliability (Frontiers, 2026); Selective attention in Virtual Classroom (eLife, 2024)."
-    },
-    {
-        "pi": "Prof. Dana Cohen",
-        "status": "Core Faculty",
-        "dept": "Gonda Brain Research Center (Grad Advisor)",
-        "lab": "Electrophysiology of Learning and Behavior Laboratory",
-        "domain": "Computational Neuroscience & Neuro-AI",
-        "subtopics": ["Deep Learning & Spike Classification", "Motor Skill Learning", "Cerebellar-Basal Ganglia Dynamics", "Population Coding"],
-        "tools": ["Chronic Multi-channel Electrophysiology", "Deep Learning (CNNs / Transformers)", "Spike Sorting Pipelines", "Optical Cerebellar Imaging"],
-        "models": ["Rodents", "Cross-species Datasets"],
-        "clinical": "Motor Learning Deficits, Ataxia",
-        "summary": "Uses deep neural networks (CNNs/Transformers) to classify electrophysiological neuronal cell types and investigates motor population dynamics.",
-        "pubs": "A deep-learning strategy to identify cell types across species from high-density extracellular recordings (Nature Methods, 2024)."
+        "clinical": "ADHD & Neurodevelopment",
+        "summary": "Studies neural tracking of continuous natural speech, conversational turn-taking, and auditory selective attention in real-life environments.",
+        "pubs": "Neural tracking of multi-speaker speech; VR classroom attention paradigms in ADHD."
     },
     {
         "pi": "Prof. Vadim Axelrod",
         "status": "Core Faculty",
         "dept": "Gonda Brain Research Center",
-        "lab": "Cognitive Neuroscience and Consciousness Laboratory",
+        "lab": "Cognitive Neuroscience & Consciousness Laboratory",
         "domain": "Cognitive & Behavioral Neuroscience",
-        "subtopics": ["Mind-Wandering & Spontaneous Thought", "Consciousness & Self-Awareness", "Face Perception", "Intracranial Decoding"],
-        "tools": ["fMRI (MVPA)", "Human Intracranial EEG (iEEG/ECoG)", "Magnetoencephalography (MEG)", "Non-invasive tDCS/tACS Stimulation"],
+        "subtopics": ["Consciousness & Spontaneous Thought", "Face Perception", "Brain Decoding", "Machine Learning"],
+        "tools": ["fMRI / MVPA", "Intracranial iEEG / ECoG", "MEG", "Non-invasive Neuromodulation"],
         "models": ["Humans"],
-        "clinical": "Neurosurgical Patient Cohorts, Psychiatric Disorders",
-        "summary": "Combines human intracranial ECoG and machine learning decoding to map spontaneous thought dynamics, face perception, and meta-awareness.",
-        "pubs": "Intracranial decoding of spontaneous thought (Cerebral Cortex, 2024-2025); tDCS modulation of spontaneous self-directed thoughts (PNAS)."
+        "clinical": "Consciousness Disorders, Neuropsychiatry",
+        "summary": "Decodes internal subjective experiences (daydreaming, mind-wandering), visual face perception, and humor using fMRI and intracranial iEEG.",
+        "pubs": "Decoding subjective visual experience with intracranial recordings; Face processing in occipito-temporal cortex."
     },
     {
         "pi": "Prof. Moshe Bar",
         "status": "Core Faculty",
         "dept": "Gonda Brain Research Center",
-        "lab": "Cognitive Neuroscience Laboratory",
+        "lab": "Cognitive Neuroscience & Predictive Brain Laboratory",
         "domain": "Cognitive & Behavioral Neuroscience",
-        "subtopics": ["Top-Down Predictive Brain", "Default Mode Network (DMN)", "Digital Therapeutics for Depression", "Curiosity & Thought Dynamics"],
-        "tools": ["Combined fMRI / MEG", "Gamified Digital Apps (FTP)", "Top-Down Predictive Computational Models", "Remote AI Optical Speckle Analysis"],
+        "subtopics": ["Predictive Brain", "Top-Down Object Recognition", "Default Mode Network", "Digital Therapeutics", "Optical AI Decoding"],
+        "tools": ["fMRI", "MEG", "Optical Speckle Pattern AI Decoding", "Computational Modeling"],
         "models": ["Humans"],
-        "clinical": "Clinical Depression, Anxiety, Mood Disorders",
-        "summary": "Explores top-down predictive processing and develops digital health applications (Facilitating Thought Progression) for clinical depression.",
-        "pubs": "Facilitating Thought Progression via a gamified app for depression (Behavior Therapy, 2026); Thought Dynamics and Mood Disorders (2026)."
+        "clinical": "Depression & Mood Disorders",
+        "summary": "Explores proactive brain predictions, curiosity, Default Mode Network dynamics, and non-contact optical AI decoding of inner speech.",
+        "pubs": "Predictive visual object recognition; Facilitating Thought Progression digital intervention for depression."
     },
     {
         "pi": "Prof. Michal Ben-Shachar",
         "status": "Core Faculty",
-        "dept": "Gonda Brain Research Center (Interdisciplinary Unit Head)",
-        "lab": "Neurobiology of Language and Reading Plasticity Laboratory",
+        "dept": "Gonda Brain Research Center",
+        "lab": "Neurobiology of Language & Reading Plasticity Lab",
         "domain": "Cognitive & Behavioral Neuroscience",
-        "subtopics": ["Language Development & Plasticity", "Dyslexia & Reading Pathways", "White Matter Tractography", "Stuttering Circuits"],
-        "tools": ["Diffusion MRI (dMRI / DTI / HARDI)", "Automated Fiber Quantification (AFQ)", "Functional MRI (fMRI)", "Psycholinguistics"],
+        "subtopics": ["Language Development", "Reading Plasticity", "Developmental Dyslexia", "Stuttering", "White Matter Tracts"],
+        "tools": ["Diffusion MRI (dMRI/DTI)", "Automated Fiber Quantification (AFQ)", "fMRI"],
         "models": ["Humans"],
-        "clinical": "Developmental Dyslexia, Persistent Stuttering, Preterm Infants",
-        "summary": "Uses diffusion MRI tractography to examine white matter pathways (arcuate fasciculus) in reading, language acquisition, and developmental stuttering.",
-        "pubs": "White matter correlates of sensorimotor synchronization in persistent developmental stuttering (J. Commun. Disord., 2025)."
-    },
-    {
-        "pi": "Prof. Rafi Haddad",
-        "status": "Core Faculty",
-        "dept": "Gonda Brain Research Center",
-        "lab": "Learning, Decision-Making, Olfaction & Neural Circuits Laboratory",
-        "domain": "Systems & Circuit Neuroscience",
-        "subtopics": ["Olfactory Neural Coding", "Piriform Cortex Micro-circuits", "Interhemispheric Synchronization", "Decision-Making Circuits"],
-        "tools": ["Multi-channel Electrophysiology", "Optogenetics", "Viral Circuit Tracing (Rabies/AAV)", "Optical Odor Imaging"],
-        "models": ["Rodents"],
-        "clinical": "Olfactory & Sensory Processing Deficits",
-        "summary": "Investigates interhemispheric synchronization and feedforward inhibitory micro-circuits in the primary olfactory cortex.",
-        "pubs": "Bilateral odor coding and interhemispheric synchronization in piriform cortex (2024-2025)."
-    },
-    {
-        "pi": "Prof. Hamutal Slovin",
-        "status": "Core Faculty",
-        "dept": "Gonda Brain Research Center",
-        "lab": "Visual Processing and Artificial Vision Laboratory",
-        "domain": "Systems & Circuit Neuroscience",
-        "subtopics": ["Visual Population Dynamics", "Visual Prostheses & Brain-Machine Interfaces", "Image Reconstruction / Brain Reading", "Microsaccades & V1 Synchronization"],
-        "tools": ["Wide-field Voltage-Sensitive Dye Imaging (VSDI)", "Multi-electrode Arrays", "Spiking Neural Networks (SNNs)", "Electrical Microstimulation"],
-        "models": ["Primates", "Rodents"],
-        "clinical": "Blindness Restoration, Visual Prostheses",
-        "summary": "Uses VSDI optical imaging and neuromorphic spiking neural networks to study visual cortical dynamics and artificial vision prostheses.",
-        "pubs": "Effects of Microsaccades in Primary Visual Cortex: Increased Synchronization in Fovea (J. Neurosci., 2025)."
-    },
-    {
-        "pi": "Dr. David Zada",
-        "status": "Core Faculty",
-        "dept": "Gonda Brain Research Center",
-        "lab": "Social Brain and Behavior Laboratory",
-        "domain": "Cellular, Molecular & Genetic Neuroscience",
-        "subtopics": ["Sleep & Single-Neuron DNA Repair", "Social Motion & Collective Behavior", "Transparent Animal Models", "Genetic Avatars"],
-        "tools": ["Transparent Danionella cerebrum Glassfish", "In Vivo 2-Photon Whole-Brain Imaging", "Multi-animal Visual VR", "CRISPR & Single-cell RNA-seq"],
-        "models": ["Danionella cerebrum Glassfish", "Zebrafish"],
-        "clinical": "Neurodevelopmental Social Disorders, Aging, DNA Damage",
-        "summary": "Maps whole-brain social circuits in transparent micro glassfish and investigates sleep-dependent chromosome dynamics and DNA repair.",
-        "pubs": "Convergent thyroid-ATPase interactions regulate collective behavior in Danionella (Cell Reports, 2026)."
-    },
-    {
-        "pi": "Prof. Adam Zaidel",
-        "status": "Core Faculty",
-        "dept": "Gonda Brain Research Center",
-        "lab": "Multisensory Processing Laboratory",
-        "domain": "Systems & Circuit Neuroscience",
-        "subtopics": ["Multisensory Integration (Visual/Vestibular/Auditory)", "Spatial Orientation & Self-Motion", "Bayesian Optimal Decision Modeling", "Sensory Recalibration"],
-        "tools": ["3D MOOG Multisensory Motion Simulator", "Single-unit Primate Electrophysiology", "Bayesian Computational Modeling", "Human Psychophysics"],
-        "models": ["Humans", "Primates", "Rodents"],
-        "clinical": "Parkinson's Disease, Autism Spectrum Disorder (Sensory Processing)",
-        "summary": "Combines Israel's 3D MOOG motion simulator with single-unit electrophysiology and Bayesian modeling to study multisensory orientation.",
-        "pubs": "Contrary neuronal recalibration in different multisensory cortical areas (eLife)."
+        "clinical": "Dyslexia & Speech Disorders",
+        "summary": "Maps human language acquisition, reading pathways, and structural white matter tract changes in dyslexia and persistent stuttering.",
+        "pubs": "White matter microstructural changes following reading intervention; Arcuate fasciculus tractography."
     },
     {
         "pi": "Prof. Ari Zivotofsky",
         "status": "Core Faculty",
         "dept": "Gonda Brain Research Center",
-        "lab": "Ocular Motor and Visual Perception Laboratory",
+        "lab": "Ocular Motor & Visual Perception Laboratory",
         "domain": "Cognitive & Behavioral Neuroscience",
-        "subtopics": ["Oculomotor Control & Saccades", "Eye-Tracking Biomarkers for Neurodegeneration", "Unintentional Gait Synchronization", "Neuro-ethics"],
-        "tools": ["High-speed Video-Oculography", "Eye-Tracking Systems", "Visual Psychophysics", "Gait Synchronization Analysis"],
+        "subtopics": ["Oculomotor Biomarkers", "Eye Movements & Saccades", "Visual Perception", "Cognitive Control"],
+        "tools": ["High-frequency Video-oculography", "Eye-tracking", "Psycholinguistic Paradigms"],
         "models": ["Humans"],
-        "clinical": "Motor Neurone Disease, Early Alzheimer's / Parkinson's Detection",
-        "summary": "Develops non-invasive video-oculography eye-tracking biomarkers for early detection of neurodegenerative and motor neurone diseases.",
-        "pubs": "Oculomotor atypicalities in motor neurone disease: a systematic review (Frontiers in Neuroscience, 2024)."
+        "clinical": "Parkinson's & Movement Disorders, Motor Neurone Disease",
+        "summary": "Investigates cognitive control of saccadic eye movements and develops oculomotor biomarkers for neurodegenerative and motor neurone diseases.",
+        "pubs": "Oculomotor atypicalities in motor neurone disease: systematic review (Frontiers in Neuroscience, 2024)."
     },
-    # KEY AFFILIATED LABS
     {
-        "pi": "Prof. Alon Korngreen",
-        "status": "Affiliated Faculty",
-        "dept": "Faculty of Life Sciences",
-        "lab": "Cellular Neurophysiology Laboratory",
+        "pi": "Prof. Hamutal Slovin",
+        "status": "Core Faculty",
+        "dept": "Gonda Brain Research Center",
+        "lab": "Visual Processing & Artificial Vision Laboratory",
         "domain": "Systems & Circuit Neuroscience",
-        "subtopics": ["Subthalamic Nucleus & Globus Pallidus Biophysics", "Ion Channel Kinetics", "Basal Ganglia Micro-circuits"],
-        "tools": ["Whole-cell Patch-clamp Electrophysiology", "2-Photon Calcium Imaging", "Hodgkin-Huxley Modeling", "Optogenetics"],
-        "models": ["Rodents"],
-        "clinical": "Parkinson's Disease",
-        "summary": "Investigates cellular biophysics and synaptic plasticity of basal ganglia micro-circuits using patch-clamp and computational modeling.",
-        "pubs": "Long-term plasticity of glutamatergic inputs in basal ganglia; Biophysics of Subthalamic Nucleus."
+        "subtopics": ["Visual Cortex Dynamics", "Artificial Vision Prostheses", "Spiking Neural Networks", "Voltage-Sensitive Dye"],
+        "tools": ["Voltage-Sensitive Dye Imaging (VSDI)", "In Vivo Electrophysiology", "Spiking Neural Networks (SNNs)"],
+        "models": ["Rodents / Primates"],
+        "clinical": "Blindness & Visual Prostheses",
+        "summary": "Maps visual cortex population responses and builds cortical visual prostheses and biologically plausible neural network models.",
+        "pubs": "Visual cortical population dynamics during perception; Cortical micro-stimulation for visual prostheses."
     },
     {
-        "pi": "Prof. Lior Appelbaum",
-        "status": "Affiliated Faculty",
-        "dept": "Faculty of Life Sciences",
-        "lab": "Molecular & Developmental Neuroscience Laboratory",
+        "pi": "Prof. Adam Zaidel",
+        "status": "Core Faculty",
+        "dept": "Gonda Brain Research Center",
+        "lab": "Multisensory Processing & Decision Laboratory",
+        "domain": "Systems & Circuit Neuroscience",
+        "subtopics": ["Multisensory Integration", "Spatial Orientation", "Bayesian Decision Models", "Self-Motion Perception"],
+        "tools": ["3D MOOG Motion Simulator", "Human Neuroimaging & Electrophysiology", "Eye-tracking"],
+        "models": ["Humans", "Rodents / Primates"],
+        "clinical": "Vestibular & Balance Disorders",
+        "summary": "Studies visual-vestibular-auditory multisensory calibration and Bayesian decision-making during spatial navigation and self-motion.",
+        "pubs": "Bayesian multisensory integration in spatial orientation; Vestibular recalibration dynamics."
+    },
+    {
+        "pi": "Dr. David Zada",
+        "status": "Core Faculty",
+        "dept": "Gonda Brain Research Center",
+        "lab": "Social Brain & Behavior Laboratory",
         "domain": "Cellular, Molecular & Genetic Neuroscience",
-        "subtopics": ["Sleep Regulation & Synaptic Plasticity", "Chromosome Dynamics & DNA Repair", "Neurodevelopmental Genetics"],
-        "tools": ["Transgenic Zebrafish", "3D Live Confocal / 2-Photon Imaging", "High-throughput Sleep Tracking", "CRISPR"],
-        "models": ["Zebrafish"],
-        "clinical": "MCT8 Deficiency, Neurodevelopmental Disorders",
-        "summary": "Uses transgenic zebrafish to study genetic and cellular regulation of sleep, chromosome dynamics, and synaptic maintenance.",
-        "pubs": "Parp1 promotes sleep, which enhances DNA repair in neurons (Molecular Cell)."
+        "subtopics": ["Sleep Genetics", "DNA Repair in Neurons", "Single-Cell Transcriptomics", "Chromosome Dynamics"],
+        "tools": ["2-photon Imaging", "Single-cell RNA-seq", "CRISPR", "Live Chromosome Assays"],
+        "models": ["Zebrafish / Transparent Glassfish"],
+        "clinical": "ADHD & Neurodevelopment, Rare Genetic Disorders",
+        "summary": "Investigates single-neuron sleep mechanisms, DNA damage repair (Parp1) during sleep, and genetic avatars of neurodevelopmental disorders.",
+        "pubs": "Parp1 promotes sleep-dependent DNA repair in live neurons; Single-cell dynamics of sleep."
+    },
+    {
+        "pi": "Prof. Dana Cohen",
+        "status": "Core Faculty",
+        "dept": "Gonda Brain Research Center",
+        "lab": "Electrophysiology of Learning & Behavior Lab",
+        "domain": "Computational Neuroscience & Neuro-AI",
+        "subtopics": ["Machine Learning & Deep Learning", "Spike Sorting & Waveform Classification", "Cerebellar Networks", "Motor Learning"],
+        "tools": ["Multi-electrode Arrays", "Deep Learning Transformers/CNNs", "In Vivo Electrophysiology"],
+        "models": ["Rodents / Primates"],
+        "clinical": "Parkinson's & Movement Disorders, Ataxia",
+        "summary": "Applies deep convolutional and transformer networks to sort spike waveforms and decode motor learning in cerebellar circuits.",
+        "pubs": "Transformer architectures for extracellular spike classification; Cerebellar network dynamics in motor adaptation."
+    },
+    {
+        "pi": "Prof. Gal Yadid",
+        "status": "Affiliated Faculty",
+        "dept": "Department of Life Sciences",
+        "lab": "Neuropsychopharmacology Laboratory",
+        "domain": "Cellular, Molecular & Genetic Neuroscience",
+        "subtopics": ["PTSD & Memory Erasure", "Targeted Bio-nanoparticles", "Addiction Relapse", "Mesenchymal Stem Cells"],
+        "tools": ["Bio-nanoparticles", "In Vivo Microdialysis", "Deep Brain Stimulation"],
+        "models": ["Rodents / Primates"],
+        "clinical": "PTSD & Trauma, Addiction",
+        "summary": "Develops targeted nanoparticles crossing the blood-brain barrier for PTSD treatment and traumatic memory erasure.",
+        "pubs": "Targeted nanoparticle delivery across the blood-brain barrier for PTSD treatment."
     },
     {
         "pi": "Prof. Eitan Okun",
         "status": "Affiliated Faculty",
-        "dept": "Faculty of Life Sciences",
-        "lab": "Neurodevelopment & Neurodegeneration Laboratory",
+        "dept": "Department of Life Sciences",
+        "lab": "Neurodevelopment & Neurodegeneration Lab",
         "domain": "Cellular, Molecular & Genetic Neuroscience",
-        "subtopics": ["Microglial Neuroinflammation", "Alzheimer's Disease Pathogenesis", "Toll-like Receptors (TLRs)", "Exercise Neuroprotection"],
-        "tools": ["Transgenic Alzheimer's Mouse Models", "Immunohistochemistry", "Microglial Morphology Analysis", "Behavioral Mazes"],
-        "models": ["Rodents"],
-        "clinical": "Alzheimer's Disease, Down Syndrome",
-        "summary": "Studies microglial neuroinflammation, TLR pathways, and exercise-induced neurogenesis in Alzheimer's disease models.",
+        "subtopics": ["Microglial Neuroinflammation", "Alzheimer's Pathogenesis", "Toll-like Receptors", "Exercise Neuroprotection"],
+        "tools": ["Transgenic AD Mouse Models", "Immunohistochemistry", "Microglial Profiling"],
+        "models": ["Rodents / Primates"],
+        "clinical": "Alzheimer's & Neurodegeneration, Down Syndrome",
+        "summary": "Studies microglial TLR signaling pathways in Alzheimer's disease and neuroprotective benefits of physical exercise.",
         "pubs": "TLR pathways mediating neuroinflammation in cognitive decline; Exercise-induced neurogenesis."
     },
     {
@@ -248,64 +217,55 @@ LABS = [
         "dept": "Faculty of Engineering",
         "lab": "Spatial Genomics Group",
         "domain": "Cellular, Molecular & Genetic Neuroscience",
-        "subtopics": ["Spatial Transcriptomics", "Expansion Microscopy (ExM)", "In Situ RNA Sequencing", "RNA Editing"],
-        "tools": ["Expansion Sequencing (ExSeq)", "High-throughput Fluorescence Microscopy", "Single-cell Spatial Algorithms"],
-        "models": ["Mammals", "Cephalopods"],
-        "clinical": "Neurodegenerative Transcriptomics",
-        "summary": "Develops expansion sequencing and spatial transcriptomics to map nanoscale gene expression in neural circuits.",
-        "pubs": "Trade-off between transcriptome plasticity and genome evolution (Cell); Spatial transcriptomics in neural tissue."
+        "subtopics": ["Spatial Transcriptomics", "Expansion Microscopy", "In Situ Sequencing", "RNA Editing"],
+        "tools": ["Expansion Sequencing (ExSeq)", "High-throughput Fluorescence Microscopy", "Spatial Genomics"],
+        "models": ["Rodents / Primates", "Drosophila / Invertebrates"],
+        "clinical": "Alzheimer's & Neurodegeneration, Cancer",
+        "summary": "Pioneers spatial genomics and in situ RNA sequencing to map gene expression directly within intact brain tissue.",
+        "pubs": "Expansion sequencing: Spatially resolved RNA sequencing in intact tissue."
     },
     {
-        "pi": "Prof. Gal Yadid",
-        "status": "Affiliated Faculty",
-        "dept": "Faculty of Life Sciences",
-        "lab": "Neuropsychopharmacology Laboratory",
-        "domain": "Cellular, Molecular & Genetic Neuroscience",
-        "subtopics": ["PTSD & Traumatic Memory Erasure", "Addiction Memory Remodeling", "Nanoparticle BBB Drug Delivery"],
-        "tools": ["Targeted Bio-nanoparticles", "In Vivo Microdialysis", "Operant Self-Administration", "Deep Brain Electrical Stimulation"],
-        "models": ["Rodents"],
-        "clinical": "Post-Traumatic Stress Disorder (PTSD), Substance Addiction",
-        "summary": "Develops targeted nanoparticle drug delivery across the blood-brain barrier for PTSD memory erasure and addiction treatment.",
-        "pubs": "Targeted nanoparticle delivery across the blood-brain barrier for PTSD treatment."
-    },
-    {
-        "pi": "Prof. Avi Goldstein",
+        "pi": "Prof. Yuri Rassovsky",
         "status": "Affiliated Faculty",
         "dept": "Department of Psychology",
-        "lab": "Electromagnetic Brain Imaging Unit",
+        "lab": "Clinical Neuropsychology & VR Laboratory",
         "domain": "Cognitive & Behavioral Neuroscience",
-        "subtopics": ["Executive Control Oscillations", "MEG Signal Processing", "Language Processing in Autism"],
-        "tools": ["248-channel Whole-head MEG", "High-density EEG", "Source Localization Algorithms"],
+        "subtopics": ["Executive Control & Neuro-rehabilitation", "Virtual Reality TBI Assessment", "Cognitive Enhancement"],
+        "tools": ["Virtual Reality", "Psychoneuropsychological Batteries", "Autonomic Psychophysiology"],
         "models": ["Humans"],
-        "clinical": "Autism Spectrum Disorder, Cognitive Impairments",
-        "summary": "Operates the 248-channel MEG system investigating neural oscillations during executive control and language perception.",
-        "pubs": "MEG neural dynamics of cognitive control and executive functioning."
+        "clinical": "PTSD & Trauma, TBI, Schizophrenia",
+        "summary": "Uses immersive virtual reality cognitive rehabilitation protocols to improve real-world functional outcomes in TBI and psychiatric patients.",
+        "pubs": "VR-based cognitive rehabilitation improving functional outcomes in clinical TBI."
     },
     {
-        "pi": "Prof. Ido Kanter",
+        "pi": "Prof. Sharon Armon-Lotem & Prof. Natalia Meir",
         "status": "Affiliated Faculty",
-        "dept": "Department of Physics",
-        "lab": "Complex Systems and Computational Neuroscience Laboratory",
-        "domain": "Computational Neuroscience & Neuro-AI",
-        "subtopics": ["Ultrafast Biological Learning Rules", "Dendritic Computing Beyond Backprop", "Physics-Inspired Neural Networks"],
-        "tools": ["Biophysical Neural Simulations", "Non-linear Dynamics", "Mathematical Network Modeling"],
-        "models": ["Computational Models", "In Vitro Neuronal Cultures"],
-        "clinical": "AI Architecture Optimization, Epilepsy Dynamics",
-        "summary": "Discovers ultrafast biological learning rules in individual dendrites that inspire non-backprop artificial intelligence.",
-        "pubs": "Dendritic learning rules outperforming traditional deep neural network training."
+        "dept": "Department of English Literature & Linguistics",
+        "lab": "Bilingualism & Developmental Language Disorders Lab",
+        "domain": "Cognitive & Behavioral Neuroscience",
+        "subtopics": ["Language Development", "Eye-Tracking & Psycholinguistic Paradigms", "Bilingual Reading", "Developmental Language Disorder"],
+        "tools": ["Eye-tracking", "Psycholinguistic Paradigms", "Linguistic Testing"],
+        "models": ["Humans"],
+        "clinical": "Dyslexia & Speech Disorders",
+        "summary": "Uses high-speed eye-tracking to study real-time sentence processing, bilingual reading, and language impairment in children.",
+        "pubs": "Eye-tracking indicators of real-time sentence processing in bilingual children with DLD."
     }
 ]
 
-# Initialize Session State for Wizard Steps
+# Initialize Session State
 if 'step' not in st.session_state:
     st.session_state.step = 1
 if 'answers' not in st.session_state:
     st.session_state.answers = {}
 
 # Progress Bar
-progress = (st.session_state.step - 1) / 3.0
-st.progress(progress)
-st.caption(f"Step {st.session_state.step} of 4")
+if st.session_state.step <= 4:
+    progress_val = max(0.0, min(1.0, (st.session_state.step - 1) / 4.0))
+    st.progress(progress_val)
+    st.caption(f"Step {st.session_state.step} of 4")
+else:
+    st.progress(1.0)
+    st.caption("Matches Complete! 🎯")
 
 # --- STEP 1: DOMAIN ---
 if st.session_state.step == 1:
@@ -315,7 +275,7 @@ if st.session_state.step == 1:
         [
             "Cognitive & Behavioral Neuroscience (Human cognition, attention, speech, language, memory, consciousness)",
             "Systems & Circuit Neuroscience (Neural circuits, sensory processing, motor control, basal ganglia, visual/olfactory systems)",
-            "Computational Neuroscience & Neuro-AI (Deep learning, neural network modeling, spike sorting, mathematical neuroscience)",
+            "Computational Neuroscience & Neuro-AI (Deep learning, machine learning, signal processing, mathematical neuroscience)",
             "Cellular, Molecular & Genetic Neuroscience (Sleep genetics, DNA repair, spatial transcriptomics, neuroinflammation, neurogenetics)"
         ]
     )
@@ -328,10 +288,9 @@ if st.session_state.step == 1:
 
 # --- STEP 2: SUBTOPIC ---
 elif st.session_state.step == 2:
-    selected_domain = st.session_state.answers['domain']
-    st.subheader(f"Step 2: What specific topics within {selected_domain} interest you?")
+    selected_domain = st.session_state.answers.get('domain', '')
+    st.subheader(f"Step 2: What specific topics or methods within {selected_domain} interest you?")
     
-    # Dynamic options based on domain
     topic_options = []
     if "Cognitive" in selected_domain:
         topic_options = [
@@ -352,11 +311,11 @@ elif st.session_state.step == 2:
         ]
     elif "Computational" in selected_domain:
         topic_options = [
-            "Deep Learning & Transformers for Neural Waveform Classification",
-            "Neuromorphic Spiking Neural Networks (SNNs) for Visual Processing",
-            "Bayesian Optimal Decision Modeling & Sensory Recalibration",
-            "Ultrafast Biological Learning Rules & Dendritic Computing",
-            "Computational Neural Network Simulations of Basal Ganglia Circuits"
+            "Neural Signal Processing & Time-Series Analysis (Filtering, Wavelets, LFP/EEG Dynamics)",
+            "Machine Learning, Deep Learning, Transformers & LLMs / NLP",
+            "Advanced Statistics, Data Science & Multivariate Dimensionality Reduction",
+            "Biophysical, Spiking Neural Network (SNN) & Circuit Modeling",
+            "Network Science, Graph Theory, Connectomics & Spatial Data Analysis"
         ]
     else: # Cellular/Molecular
         topic_options = [
@@ -364,8 +323,7 @@ elif st.session_state.step == 2:
             "Microglial Neuroinflammation & Alzheimer's Pathogenesis",
             "Spatial Transcriptomics, Expansion Microscopy & In Situ Sequencing",
             "Social Behavior Circuits & Collective Motion in Transparent Fish",
-            "Targeted Bio-nanoparticle BBB Drug Delivery for PTSD & Memory Erasure",
-            "Microbiome-Gut-Brain Axis & Microfluidic Organs-on-a-Chip"
+            "Targeted Bio-nanoparticle BBB Drug Delivery for PTSD & Memory Erasure"
         ]
         
     selected_topics = st.multiselect("Select 1 to 3 specific sub-topics:", topic_options)
@@ -455,16 +413,18 @@ elif st.session_state.step == 5:
             
         # Subtopic match
         for user_sub in ans.get('subtopics', []):
+            words = [w.strip() for w in user_sub.replace("(", " ").replace(")", " ").replace("/", " ").split() if len(w.strip()) > 3]
             for lab_sub in lab.get('subtopics', []):
-                if any(k.lower() in lab_sub.lower() for k in user_sub.split()):
+                if any(w.lower() in lab_sub.lower() for w in words):
                     score += 15
                     reasons.append(f"Matching topic: {lab_sub}")
                     break
                     
         # Tool match
         for user_tool in ans.get('tools', []):
+            words = [w.strip() for w in user_tool.replace("(", " ").replace(")", " ").replace("/", " ").split() if len(w.strip()) > 3]
             for lab_tool in lab.get('tools', []):
-                if any(k.lower() in lab_tool.lower() for k in user_tool.split()):
+                if any(w.lower() in lab_tool.lower() for w in words):
                     score += 12
                     reasons.append(f"Matching methodology: {lab_tool}")
                     break
@@ -480,10 +440,10 @@ elif st.session_state.step == 5:
                     
         # Clinical match
         for user_clin in ans.get('clinical', []):
-            if any(k.lower() in lab.get('clinical', '').lower() for k in user_clin.split()):
+            clin_words = [w.strip() for w in user_clin.split() if len(w.strip()) > 3]
+            if any(w.lower() in lab.get('clinical', '').lower() for w in clin_words):
                 score += 10
                 reasons.append(f"Clinical focus: {user_clin}")
-                break
                 
         # CORE FACULTY PRIORITY BOOST (1.4x multiplier)
         if lab['status'] == 'Core Faculty':
@@ -515,12 +475,12 @@ elif st.session_state.step == 5:
             <p style="color: #4B5563; font-size: 0.95rem; margin-bottom: 12px;">{lab['summary']}</p>
             <p style="font-size: 0.9rem; margin-bottom: 4px;"><strong>🧪 Primary Tools:</strong> {', '.join(lab['tools'])}</p>
             <p style="font-size: 0.9rem; margin-bottom: 4px;"><strong>🐭 Model Systems:</strong> {', '.join(lab['models'])}</p>
-            <p style="font-size: 0.88rem; color: #1F2937; margin-bottom: 0;"><strong>📚 Recent Work (2024–2026):</strong> {lab['pubs']}</p>
+            <p style="font-size: 0.88rem; color: #1F2937; margin-bottom: 0;"><strong>📚 Recent Work:</strong> {lab['pubs']}</p>
         </div>
         """, unsafe_allow_html=True)
-        
-    st.markdown("---")
-    if st.button("🔄 Start Over"):
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    if st.button("🔄 Start Over", type="secondary"):
         st.session_state.step = 1
         st.session_state.answers = {}
         st.rerun()
