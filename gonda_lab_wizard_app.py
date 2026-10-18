@@ -456,7 +456,7 @@ elif st.session_state.step == 5:
         # Subtopic match
         for user_sub in ans.get('subtopics', []):
             for lab_sub in lab.get('subtopics', []):
-                if any(k.lower() in lab_sub.lower() for k.lower() in user_sub.split()):
+                if any(k.lower() in lab_sub.lower() for k in user_sub.split()):
                     score += 15
                     reasons.append(f"Matching topic: {lab_sub}")
                     break
@@ -464,7 +464,7 @@ elif st.session_state.step == 5:
         # Tool match
         for user_tool in ans.get('tools', []):
             for lab_tool in lab.get('tools', []):
-                if any(k.lower() in lab_tool.lower() for k.lower() in user_tool.split()):
+                if any(k.lower() in lab_tool.lower() for k in user_tool.split()):
                     score += 12
                     reasons.append(f"Matching methodology: {lab_tool}")
                     break
@@ -480,7 +480,7 @@ elif st.session_state.step == 5:
                     
         # Clinical match
         for user_clin in ans.get('clinical', []):
-            if any(k.lower() in lab.get('clinical', '').lower() for k.lower() in user_clin.split()):
+            if any(k.lower() in lab.get('clinical', '').lower() for k in user_clin.split()):
                 score += 10
                 reasons.append(f"Clinical focus: {user_clin}")
                 break
